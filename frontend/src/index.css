@@ -1,6 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
 :root {
   font-family: Arial, Helvetica, sans-serif !important;
@@ -80,32 +80,127 @@
   }
 }
 
-@layer components {
-  .btn-primary {
-    @apply bg-brand-500 hover:bg-brand-600 text-white font-semibold px-6 py-2.5 rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:shadow-lg hover:shadow-violet-500/25;
-  }
-  .btn-secondary {
-    @apply bg-dark-600 hover:bg-dark-500 text-slate-200 font-semibold px-6 py-2.5 rounded-xl border border-dark-500 hover:border-dark-400 transition-all duration-200 active:scale-95 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/25;
-  }
-  .btn-ghost {
-    @apply text-slate-400 hover:text-slate-200 hover:bg-dark-700 px-4 py-2 rounded-lg transition-all duration-150;
-  }
-  .card {
-    @apply bg-dark-800 border border-dark-600 rounded-2xl p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-violet-500/10 hover:border-brand-500;
-  }
-  .input-field {
-    @apply w-full bg-dark-700 border border-dark-500 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 outline-none transition-all duration-200;
-  }
-  .input-field:focus {
-    @apply border-brand-500;
-    box-shadow: 0 0 0 2px var(--brand-ring);
-  }
-  .label {
-    @apply block text-sm font-medium text-slate-400 mb-1.5;
-  }
-  .stat-card {
-    @apply bg-dark-800 border border-dark-600 rounded-2xl p-5 flex flex-col gap-1 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-violet-500/10 hover:border-brand-500;
-  }
+/* Components using standard CSS declarations */
+.btn-primary {
+  background-color: var(--brand-500);
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.625rem 1.5rem;
+  border-radius: 0.75rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+}
+.btn-primary:hover {
+  background-color: var(--brand-600);
+  transform: translateY(-0.125rem);
+  box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.25), 0 4px 6px -4px rgba(139, 92, 246, 0.25);
+}
+.btn-primary:active {
+  transform: scale(0.95);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-secondary {
+  background-color: var(--bg-dark-600);
+  color: var(--text-slate-200);
+  font-weight: 600;
+  padding: 0.625rem 1.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--bg-dark-500);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.btn-secondary:hover {
+  background-color: var(--bg-dark-500);
+  border-color: var(--bg-dark-400);
+  transform: translateY(-0.125rem);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.25);
+}
+.btn-secondary:active {
+  transform: scale(0.95);
+}
+
+.btn-ghost {
+  color: var(--text-slate-400);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.15s ease-in-out;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+.btn-ghost:hover {
+  color: var(--text-slate-200);
+  background-color: var(--bg-dark-700);
+}
+
+.card {
+  background-color: var(--bg-dark-800);
+  border: 1px solid var(--bg-dark-600);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card:hover {
+  transform: translateY(-0.25rem);
+  box-shadow: 0 20px 25px -5px rgba(139, 92, 246, 0.1), 0 8px 10px -6px rgba(139, 92, 246, 0.1);
+  border-color: var(--brand-500);
+}
+
+.input-field {
+  width: 100%;
+  background-color: var(--bg-dark-700);
+  border: 1px solid var(--bg-dark-500);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: var(--text-slate-100);
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+.input-field::placeholder {
+  color: var(--text-slate-500);
+}
+.input-field:focus {
+  border-color: var(--brand-500);
+  box-shadow: 0 0 0 2px var(--brand-ring);
+}
+
+.label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-slate-400);
+  margin-bottom: 0.375rem;
+}
+
+.stat-card {
+  background-color: var(--bg-dark-800);
+  border: 1px solid var(--bg-dark-600);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.stat-card:hover {
+  transform: translateY(-0.125rem);
+  box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.1), 0 4px 6px -4px rgba(139, 92, 246, 0.1);
+  border-color: var(--brand-500);
 }
 
 /* Scrollbar */
