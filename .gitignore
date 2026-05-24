@@ -23,3 +23,4 @@ npm-debug.log*
 
 # EF migrations (keep your own)
 # Migrations/
+.vercel
