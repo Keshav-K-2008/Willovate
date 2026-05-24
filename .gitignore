@@ -1,0 +1,25 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+appsettings.Development.json
+
+# Node
+node_modules/
+dist/
+.env
+.env.local
+.env.production
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# EF migrations (keep your own)
+# Migrations/

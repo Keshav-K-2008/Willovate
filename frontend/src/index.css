@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Arial, Helvetica, sans-serif !important;
+
+  /* Theme color mapping (Light Mode) - minimal light-color violet gradient */
+  --bg-dark-900: #faf5ff; /* Soft lavender 50 */
+  --bg-dark-800: #ffffff; /* Pure White */
+  --bg-dark-700: #f3e8ff; /* Soft lavender 100 */
+  --bg-dark-600: #e9d5ff; /* Lavender 200 */
+  --bg-dark-500: #d8b4fe; /* Lavender 300 */
+  --bg-dark-400: #c084fc; /* Lavender 400 */
+
+  --text-slate-100: #1e1b4b; /* Indigo-950 */
+  --text-slate-200: #312e81; /* Indigo-900 */
+  --text-slate-300: #4338ca; /* Indigo-800 */
+  --text-slate-400: #4f46e5; /* Indigo-700 */
+  --text-slate-500: #6366f1; /* Indigo-600 */
+  --text-slate-600: #818cf8; /* Indigo-400 */
+
+  --brand-50:  #f5f3ff;
+  --brand-100: #ede9fe;
+  --brand-200: #ddd6fe;
+  --brand-300: #c4b5fd;
+  --brand-400: #a78bfa;
+  --brand-500: #8b5cf6; /* Primary violet-500 */
+  --brand-600: #7c3aed; /* Hover violet-600 */
+  --brand-700: #6d28d9;
+  --brand-800: #5b21b6;
+  --brand-900: #4c1d95;
+  --brand-ring: rgba(139, 92, 246, 0.2);
+}
+
+.dark {
+  /* Theme color mapping (Dark Mode) - deep rich dark-violet */
+  --bg-dark-900: #090514; /* Midnight violet */
+  --bg-dark-800: #120d24; /* Card dark violet */
+  --bg-dark-700: #1c1538; /* Component dark violet */
+  --bg-dark-600: #2d2254; /* Border dark-violet */
+  --bg-dark-500: #413274;
+  --bg-dark-400: #5c47a0;
+
+  --text-slate-100: #f5f3ff; /* Soft violet white */
+  --text-slate-200: #ede9fe;
+  --text-slate-300: #ddd6fe;
+  --text-slate-400: #c4b5fd;
+  --text-slate-500: #a78bfa;
+  --text-slate-600: #7c3aed;
+
+  --brand-50:  #f5f3ff;
+  --brand-100: #ede9fe;
+  --brand-200: #ddd6fe;
+  --brand-300: #c4b5fd;
+  --brand-400: #a78bfa;
+  --brand-500: #a78bfa; /* Brand violet-400 (better contrast on dark) */
+  --brand-600: #c4b5fd; /* Hover brand violet-300 */
+  --brand-700: #ddd6fe;
+  --brand-800: #ede9fe;
+  --brand-900: #f5f3ff;
+  --brand-ring: rgba(167, 139, 250, 0.2);
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: linear-gradient(135deg, var(--bg-dark-900), var(--bg-dark-700));
+    background-attachment: fixed;
+    color: var(--text-slate-200);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: Arial, Helvetica, sans-serif;
+    color: var(--text-slate-100);
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-brand-500 hover:bg-brand-600 text-white font-semibold px-6 py-2.5 rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:shadow-lg hover:shadow-violet-500/25;
+  }
+  .btn-secondary {
+    @apply bg-dark-600 hover:bg-dark-500 text-slate-200 font-semibold px-6 py-2.5 rounded-xl border border-dark-500 hover:border-dark-400 transition-all duration-200 active:scale-95 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/25;
+  }
+  .btn-ghost {
+    @apply text-slate-400 hover:text-slate-200 hover:bg-dark-700 px-4 py-2 rounded-lg transition-all duration-150;
+  }
+  .card {
+    @apply bg-dark-800 border border-dark-600 rounded-2xl p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-violet-500/10 hover:border-brand-500;
+  }
+  .input-field {
+    @apply w-full bg-dark-700 border border-dark-500 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 outline-none transition-all duration-200;
+  }
+  .input-field:focus {
+    @apply border-brand-500;
+    box-shadow: 0 0 0 2px var(--brand-ring);
+  }
+  .label {
+    @apply block text-sm font-medium text-slate-400 mb-1.5;
+  }
+  .stat-card {
+    @apply bg-dark-800 border border-dark-600 rounded-2xl p-5 flex flex-col gap-1 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-violet-500/10 hover:border-brand-500;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-dark-900); }
+::-webkit-scrollbar-thumb { background: var(--bg-dark-600); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--brand-500); }
