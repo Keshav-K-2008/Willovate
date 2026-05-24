@@ -172,6 +172,152 @@ using (var scope = app.Services.CreateScope())
         );
         db.SaveChanges();
     }
+
+    // Seed default offers and slots if not present
+    if (db.Offers.Count() < 3)
+    {
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var nextWeek = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7));
+        var tomorrow = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
+
+        var offer1 = new Offer
+        {
+            BusinessId = 4,
+            Title = "Weekend Movie Mania",
+            Description = "Get 40% off on all IMAX tickets this weekend! Valid for any movie of your choice.",
+            Category = "Entertainment",
+            OriginalPrice = 15.00m,
+            OfferPrice = 9.00m,
+            DiscountPercentage = 40.00m,
+            StartDate = today,
+            EndDate = nextWeek,
+            StartTime = new TimeOnly(12, 0),
+            EndTime = new TimeOnly(22, 0),
+            MaxBookingPerCustomer = 4,
+            TermsAndConditions = "Valid only for IMAX shows. Cannot be combined with other offers.",
+            Status = OfferStatus.Active,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        var offer2 = new Offer
+        {
+            BusinessId = 5,
+            Title = "Premium Teeth Whitening & Cleaning",
+            Description = "Complete dental hygiene package including whitening consultation, scaling, polishing, and oral wellness checkup.",
+            Category = "Dental Care",
+            OriginalPrice = 120.00m,
+            OfferPrice = 59.99m,
+            DiscountPercentage = 50.00m,
+            StartDate = today,
+            EndDate = nextWeek,
+            StartTime = new TimeOnly(9, 0),
+            EndTime = new TimeOnly(17, 0),
+            MaxBookingPerCustomer = 1,
+            TermsAndConditions = "Prior booking required. 24-hour cancellation policy applies.",
+            Status = OfferStatus.Active,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        var offer3 = new Offer
+        {
+            BusinessId = 6,
+            Title = "Espresso & Pastry Combo",
+            Description = "Start your day right with a hot freshly brewed espresso paired with a delicious butter croissant.",
+            Category = "Cafe",
+            OriginalPrice = 8.50m,
+            OfferPrice = 4.25m,
+            DiscountPercentage = 50.00m,
+            StartDate = today,
+            EndDate = nextWeek,
+            StartTime = new TimeOnly(7, 0),
+            EndTime = new TimeOnly(11, 0),
+            MaxBookingPerCustomer = 2,
+            TermsAndConditions = "Available daily from 7:00 AM to 11:00 AM only.",
+            Status = OfferStatus.Active,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        db.Offers.AddRange(offer1, offer2, offer3);
+        db.SaveChanges(); // Save to generate Offer IDs
+
+        // Add slots for Offer 1
+        db.OfferSlots.AddRange(
+            new OfferSlot
+            {
+                OfferId = offer1.Id,
+                SlotDate = today,
+                StartTime = new TimeOnly(14, 0),
+                EndTime = new TimeOnly(16, 30),
+                Capacity = 50,
+                Status = SlotStatus.Available,
+                CreatedAt = DateTime.UtcNow
+            },
+            new OfferSlot
+            {
+                OfferId = offer1.Id,
+                SlotDate = today,
+                StartTime = new TimeOnly(18, 0),
+                EndTime = new TimeOnly(20, 30),
+                Capacity = 50,
+                Status = SlotStatus.Available,
+                CreatedAt = DateTime.UtcNow
+            }
+        );
+
+        // Add slots for Offer 2
+        db.OfferSlots.AddRange(
+            new OfferSlot
+            {
+                OfferId = offer2.Id,
+                SlotDate = tomorrow,
+                StartTime = new TimeOnly(10, 0),
+                EndTime = new TimeOnly(11, 0),
+                Capacity = 2,
+                Status = SlotStatus.Available,
+                CreatedAt = DateTime.UtcNow
+            },
+            new OfferSlot
+            {
+                OfferId = offer2.Id,
+                SlotDate = tomorrow,
+                StartTime = new TimeOnly(11, 0),
+                EndTime = new TimeOnly(12, 0),
+                Capacity = 2,
+                Status = SlotStatus.Available,
+                CreatedAt = DateTime.UtcNow
+            }
+        );
+
+        // Add slots for Offer 3
+        db.OfferSlots.AddRange(
+            new OfferSlot
+            {
+                OfferId = offer3.Id,
+                SlotDate = today,
+                StartTime = new TimeOnly(8, 0),
+                EndTime = new TimeOnly(9, 30),
+                Capacity = 20,
+                Status = SlotStatus.Available,
+                CreatedAt = DateTime.UtcNow
+            },
+            new OfferSlot
+            {
+                OfferId = offer3.Id,
+                SlotDate = today,
+                StartTime = new TimeOnly(9, 30),
+                EndTime = new TimeOnly(11, 0),
+                Capacity = 20,
+                Status = SlotStatus.Available,
+                CreatedAt = DateTime.UtcNow
+            }
+        );
+
+        db.SaveChanges();
+        Console.WriteLine("[STARTUP] Dynamically seeded 3 active offers with booking slots.");
+    }
 }
 
 // ─── Middleware Pipeline ──────────────────────────────────────────────────────
