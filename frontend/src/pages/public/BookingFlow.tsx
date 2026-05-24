@@ -1,5 +1,5 @@
 import { useState, useEffect, FormEvent } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { getOfferById, getSlotsByOffer, createBooking } from '../../api/offers';
 import type { Offer, OfferSlot, Booking } from '../../types';
@@ -10,6 +10,8 @@ type Step = 'form' | 'confirmation';
 export default function BookingFlow() {
   const { offerId } = useParams<{ offerId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const preselectedSlotId = location.state?.preselectedSlotId;
 
   const [offer, setOffer] = useState<Offer | null>(null);
   const [slots, setSlots] = useState<OfferSlot[]>([]);
@@ -33,11 +35,16 @@ export default function BookingFlow() {
     Promise.all([getOfferById(id), getSlotsByOffer(id)])
       .then(([o, s]) => {
         setOffer(o);
-        setSlots(s.filter(sl => sl.status === 'Available'));
+        const availableSlots = s.filter(sl => sl.status === 'Available');
+        setSlots(availableSlots);
+        
+        if (preselectedSlotId && availableSlots.some(sl => sl.id === preselectedSlotId)) {
+          setForm(prev => ({ ...prev, slotId: String(preselectedSlotId) }));
+        }
       })
       .catch(() => toast.error('Failed to load offer.'))
       .finally(() => setLoading(false));
-  }, [offerId]);
+  }, [offerId, preselectedSlotId]);
 
   const selectedSlot = slots.find(s => s.id === +form.slotId);
   const availableSeats = selectedSlot ? selectedSlot.capacity - selectedSlot.bookedCount : 0;

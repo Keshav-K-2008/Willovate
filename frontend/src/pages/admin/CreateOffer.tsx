@@ -21,6 +21,9 @@ export default function CreateOffer() {
     offerPrice: '',
     startDate: '',
     endDate: '',
+    startTime: '09:00',
+    endTime: '18:00',
+    maxBookingPerCustomer: '4',
     termsAndConditions: '',
     status: 'Draft' as OfferStatus,
   });
@@ -55,6 +58,9 @@ export default function CreateOffer() {
         offerPrice: +form.offerPrice,
         startDate: form.startDate,
         endDate: form.endDate,
+        startTime: form.startTime,
+        endTime: form.endTime,
+        maxBookingPerCustomer: +form.maxBookingPerCustomer,
         termsAndConditions: form.termsAndConditions,
         status: form.status,
       });
@@ -157,6 +163,28 @@ export default function CreateOffer() {
               <label className="label">End Date *</label>
               <input type="date" name="endDate" value={form.endDate} onChange={handleChange}
                 required className="input-field" />
+            </div>
+          </div>
+        </div>
+
+        {/* Slot & Booking Settings */}
+        <div className="card">
+          <h2 className="font-display font-bold text-lg text-slate-100 mb-5">Slot & Booking Settings</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="label">Start Time *</label>
+              <input type="time" name="startTime" value={form.startTime} onChange={handleChange}
+                required className="input-field" />
+            </div>
+            <div>
+              <label className="label">End Time *</label>
+              <input type="time" name="endTime" value={form.endTime} onChange={handleChange}
+                required className="input-field" />
+            </div>
+            <div>
+              <label className="label">Max Bookings Per Customer *</label>
+              <input type="number" name="maxBookingPerCustomer" value={form.maxBookingPerCustomer} onChange={handleChange}
+                required min={1} className="input-field" placeholder="4" />
             </div>
           </div>
         </div>

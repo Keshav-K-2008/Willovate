@@ -26,6 +26,30 @@ public class BookingsController : ControllerBase
         return Ok(bookings);
     }
 
+    [HttpGet("export-csv")]
+    [Authorize]
+    public async Task<IActionResult> ExportCsv()
+    {
+        var bookings = await _db.Bookings
+            .Include(b => b.Offer).ThenInclude(o => o!.Business)
+            .Include(b => b.Slot)
+            .OrderByDescending(b => b.CreatedAt)
+            .ToListAsync();
+
+        var builder = new System.Text.StringBuilder();
+        builder.AppendLine("Booking Reference,Customer Name,Customer Email,Customer Phone,Offer Title,Business Name,Slot Date,Slot Time,People Count,Status,Created At");
+
+        foreach (var b in bookings)
+        {
+            var slotDate = b.Slot?.SlotDate.ToString("yyyy-MM-dd") ?? "";
+            var slotTime = b.Slot != null ? $"{b.Slot.StartTime:HH:mm} - {b.Slot.EndTime:HH:mm}" : "";
+            builder.AppendLine($"\"{b.BookingReference}\",\"{b.CustomerName}\",\"{b.CustomerEmail}\",\"{b.CustomerPhone}\",\"{b.Offer?.Title}\",\"{b.Offer?.Business?.Name}\",\"{slotDate}\",\"{slotTime}\",{b.PeopleCount},\"{b.Status}\",\"{b.CreatedAt:yyyy-MM-dd HH:mm:ss}\"");
+        }
+
+        var csvBytes = System.Text.Encoding.UTF8.GetBytes(builder.ToString());
+        return File(csvBytes, "text/csv", $"bookings_export_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv");
+    }
+
     [HttpGet("{id:int}")]
     [AllowAnonymous]
     public async Task<IActionResult> GetById(int id)
@@ -59,6 +83,15 @@ public class BookingsController : ControllerBase
         if (offer == null) return NotFound(new { message = "Offer not found." });
         if (offer.Status != OfferStatus.Active)
             return BadRequest(new { message = "This offer is not currently active." });
+
+        // Check max booking per customer (same phone)
+        var existingBookingsCount = await _db.Bookings
+            .Where(b => b.OfferId == dto.OfferId && b.CustomerPhone == dto.CustomerPhone && b.Status != BookingStatus.Cancelled)
+            .SumAsync(b => b.PeopleCount);
+        if (existingBookingsCount + dto.PeopleCount > offer.MaxBookingPerCustomer)
+        {
+            return BadRequest(new { message = $"Booking limit exceeded. You have already booked {existingBookingsCount} seat(s) for this offer (Max limit: {offer.MaxBookingPerCustomer})." });
+        }
 
         // Validate slot exists
         var slot = await _db.OfferSlots.FindAsync(dto.SlotId);

@@ -1,216 +1,242 @@
 # 🎯 Smart Offer Slot Booking System
 
-A full-stack hackathon project — React + .NET 8 + Supabase (PostgreSQL).
+A premium full-stack slot-booking web application built during the Willovate Hackathon. The system allows businesses to publish limited-time, custom-parameterized offers, generates daily booking slots based on operating hours, enforces customer safety limits, and allows admin dashboard management with real-time slot control.
 
 ---
 
-## 🚀 Quick Start (5 minutes)
+## 🛠️ Tech Stack Compliance
 
-### Prerequisites
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- [Node.js 18+](https://nodejs.org/)
-- A free [Supabase](https://supabase.com) account
+| Layer | Technology |
+| :--- | :--- |
+| **Frontend** | React 18 + TypeScript + Vanilla CSS + Tailwind CSS |
+| **Bundler** | Vite 5 |
+| **Routing** | React Router v6 |
+| **HTTP Layer** | Axios |
+| **Backend API** | .NET 8 / 10 Web API |
+| **ORM** | Entity Framework Core 8 |
+| **Database** | Supabase (PostgreSQL via Npgsql) |
+| **Authentication** | JWT Bearer Tokens + BCrypt Password Hashing |
+| **API Documentation** | Swagger / OpenAPI |
 
 ---
 
-## 1️⃣ Supabase Setup
+## 🏗️ Project Directory Architecture
 
-1. Create a new project at [supabase.com](https://supabase.com)
-2. Go to **Settings → Database**
-3. Copy your **connection string** — it looks like:
+```
+Willovate/
+├── backend/
+│   ├── SmartOffer.sln
+│   └── SmartOffer.Api/
+│       ├── Controllers/          # Auth, Business, Offers, Slots, Bookings, Dashboard
+│       ├── Data/                 # AppDbContext (Seeding logic, EF migrations)
+│       ├── DTOs/                 # Request/Response payloads
+│       ├── Migrations/           # Entity Framework database migrations
+│       ├── Models/               # User, Business, Offer, OfferSlot, Booking
+│       ├── Program.cs            # Middlewares, DI configuration, CORS, JWT setup
+│       ├── appsettings.json      # Production settings
+│       ├── .env                  # Local secrets and keys (gitignored)
+│       └── .env.example          # Environment settings template
+└── frontend/
+    ├── index.html
+    ├── package.json
+    ├── tailwind.config.js
+    ├── .env                      # API endpoint configuration (gitignored)
+    ├── .env.example              # Environment settings template
+    └── src/
+        ├── api/                  # Axios HTTP client interface
+        ├── components/           # Common components (Navbar, OfferCard, StatusBadge)
+        ├── pages/
+        │   ├── admin/            # AdminLogin, AdminDashboard, CreateOffer
+        │   └── public/           # PublicOfferList, OfferDetail, BookingFlow
+        ├── types/                # Strict TypeScript declaration files
+        ├── App.tsx               # Main routing component
+        └── main.tsx              # React mounting root
+```
+
+---
+
+## 💾 Database Schema & ER Diagram
+
+The database utilizes five relational tables hosted on PostgreSQL.
+
+### Entity-Relationship Diagram
+
+```mermaid
+erDiagram
+    USERS {
+        int Id PK
+        string Name
+        string Email UK
+        string PasswordHash
+        string Role
+        datetime CreatedAt
+    }
+    BUSINESSES {
+        int Id PK
+        string Name
+        string Address
+        string City
+        string Phone
+        string Email
+        string BusinessType
+        string OpeningTime
+        string ClosingTime
+        datetime CreatedAt
+    }
+    OFFERS {
+        int Id PK
+        int BusinessId FK
+        string Title
+        string Description
+        string Category
+        decimal OriginalPrice
+        decimal OfferPrice
+        decimal DiscountPercentage
+        date StartDate
+        date EndDate
+        string StartTime
+        string EndTime
+        int MaxBookingPerCustomer
+        string TermsAndConditions
+        string Status
+        datetime CreatedAt
+    }
+    OFFER_SLOTS {
+        int Id PK
+        int OfferId FK
+        date SlotDate
+        time StartTime
+        time EndTime
+        int Capacity
+        int BookedCount
+        string Status
+        datetime CreatedAt
+    }
+    BOOKINGS {
+        int Id PK
+        int OfferId FK
+        int SlotId FK
+        string BookingReference UK
+        string CustomerName
+        string CustomerPhone
+        string CustomerEmail
+        int PeopleCount
+        string SpecialNote
+        string Status
+        datetime CreatedAt
+    }
+
+    BUSINESSES ||--o{ OFFERS : "hosts"
+    OFFERS ||--o{ OFFER_SLOTS : "generates"
+    OFFERS ||--o{ BOOKINGS : "receives"
+    OFFER_SLOTS ||--o{ BOOKINGS : "reserves"
+```
+
+### Table Schema Definition
+
+1.  **Users Table (`Users`)**: Holds administrator authentication profiles.
+2.  **Businesses Table (`Businesses`)**: Holds profiles of partner businesses.
+3.  **Offers Table (`Offers`)**: Details dynamic deals, time limits, original/offer pricing, and rules.
+4.  **Offer Slots Table (`OfferSlots`)**: Individual slots automatically generated for active offers based on hours and capacity.
+5.  **Bookings Table (`Bookings`)**: Slot reservation entries including reference codes and guest details.
+
+---
+
+## 🚀 Step-by-Step Setup Guide
+
+### 1️⃣ Supabase Setup
+1. Create a free PostgreSQL database project at [supabase.com](https://supabase.com).
+2. Go to **Settings → Database** and copy your **connection string** (URI format or individual fields).
+
+### 2️⃣ Backend Setup (.NET 8 / 10 API)
+1. Navigate to the backend directory:
+   ```bash
+   cd backend/SmartOffer.Api
    ```
-   postgresql://postgres:[PASSWORD]@db.[PROJECT_REF].supabase.co:5432/postgres
+2. Create your `.env` file using the template:
+   ```bash
+   cp .env.example .env
    ```
+3. Open `.env` and fill in your connection string and credentials:
+   ```env
+   ConnectionStrings__DefaultConnection="Host=db.YOUR_REF.supabase.co;Port=5432;Database=postgres;Username=postgres;Password=YOUR_DB_PASSWORD;SSL Mode=Require;Trust Server Certificate=true"
+   JwtSettings__SecretKey="YOUR_32_CHARACTER_JWT_SECRET_KEY_GOES_HERE"
+   AdminCredentials__Email="admin@smartoffer.com"
+   AdminCredentials__Password="Admin@123"
+   ```
+4. Run migrations to initialize the Supabase database:
+   ```bash
+   dotnet ef database update
+   ```
+5. Start the backend server:
+   ```bash
+   dotnet run
+   ```
+   * The API server will be available at: **http://localhost:5000**
+   * View Swagger Documentation at: **http://localhost:5000/swagger**
 
----
-
-## 2️⃣ Backend Setup (.NET 8)
-
-```bash
-cd backend/SmartOffer.Api
-```
-
-### Configure `appsettings.json`
-
-Open `appsettings.json` and replace the placeholders:
-
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Host=db.YOUR_PROJECT_REF.supabase.co;Port=5432;Database=postgres;Username=postgres;Password=YOUR_DB_PASSWORD;SSL Mode=Require;Trust Server Certificate=true"
-  },
-  "JwtSettings": {
-    "SecretKey": "ANY_RANDOM_STRING_AT_LEAST_32_CHARS_LONG!!",
-    "Issuer": "SmartOfferApi",
-    "Audience": "SmartOfferClient",
-    "ExpiryInHours": 24
-  }
-}
-```
-
-### Run EF Core Migrations
-
-```bash
-# Install EF Core CLI if not installed
-dotnet tool install --global dotnet-ef
-
-# Create and apply the initial migration
-dotnet ef migrations add InitialCreate
-dotnet ef database update
-```
-
-This will automatically create all tables in your Supabase PostgreSQL database and seed an admin user.
-
-### Start the API
-
-```bash
-dotnet run
-```
-
-API will be available at: **http://localhost:5000**  
-Swagger UI: **http://localhost:5000/swagger**
-
----
-
-## 3️⃣ Frontend Setup (React + Vite)
-
-```bash
-cd frontend
-```
-
-### Configure `.env`
-
-```env
-VITE_API_URL=http://localhost:5000
-```
-
-### Install & Run
-
-```bash
-npm install
-npm run dev
-```
-
-Frontend will be available at: **http://localhost:5173**
+### 3️⃣ Frontend Setup (React + Vite)
+1. Navigate to the frontend directory:
+   ```bash
+   cd ../../frontend
+   ```
+2. Create your `.env` file from the template:
+   ```bash
+   cp .env.example .env
+   ```
+3. Verify that the API URL points to the backend server:
+   ```env
+   VITE_API_URL=http://localhost:5000
+   ```
+4. Install dependencies:
+   ```bash
+   npm install
+   ```
+5. Start the development server:
+   ```bash
+   npm run dev
+   ```
+   * The app will run locally at: **http://localhost:5173**
 
 ---
 
 ## 🔑 Default Admin Credentials
 
-| Field    | Value                   |
-|----------|-------------------------|
-| Email    | admin@smartoffer.com    |
-| Password | Admin@123               |
+Use these seeded admin credentials to test the dashboard:
+
+| Field | Value |
+| :--- | :--- |
+| **Email** | `admin@smartoffer.com` |
+| **Password** | `Admin@123` |
 
 ---
 
-## 📋 Available Screens
+## 🔌 API Documentation Reference
 
-| Screen              | Route                      | Access  |
-|---------------------|----------------------------|---------|
-| Public Offer List   | `/`                        | Public  |
-| Booking Flow        | `/offers/:id/book`         | Public  |
-| Admin Login         | `/admin/login`             | Public  |
-| Admin Dashboard     | `/admin/dashboard`         | Admin   |
-| Create Offer        | `/admin/offers/create`     | Admin   |
-
----
-
-## 🔌 API Endpoints
-
-### Auth
-| Method | Endpoint           | Description        |
-|--------|--------------------|--------------------|
-| POST   | `/api/auth/login`  | Admin login → JWT  |
-
-### Business
-| Method | Endpoint              | Auth     |
-|--------|------------------------|----------|
-| GET    | `/api/business`        | Public   |
-| POST   | `/api/business`        | Admin    |
-| PUT    | `/api/business/{id}`   | Admin    |
-| DELETE | `/api/business/{id}`   | Admin    |
-
-### Offers
-| Method | Endpoint              | Auth     | Notes                          |
-|--------|-----------------------|----------|--------------------------------|
-| GET    | `/api/offers`         | Public   | Active offers only; filterable |
-| GET    | `/api/offers/all`     | Admin    | All statuses                   |
-| GET    | `/api/offers/{id}`    | Public   | Hides cancelled/expired        |
-| POST   | `/api/offers`         | Admin    | Validates offer < original price |
-| PUT    | `/api/offers/{id}`    | Admin    |                                |
-| DELETE | `/api/offers/{id}`    | Admin    | Soft-deletes (sets Cancelled)  |
-
-### Slots
-| Method | Endpoint                      | Auth    |
-|--------|-------------------------------|---------|
-| GET    | `/api/slots`                  | Admin   |
-| GET    | `/api/offers/{offerId}/slots` | Public  |
-| POST   | `/api/slots`                  | Admin   |
-| PUT    | `/api/slots/{id}`             | Admin   |
-| DELETE | `/api/slots/{id}`             | Admin   |
-
-### Bookings
-| Method | Endpoint                         | Auth     | Notes                        |
-|--------|----------------------------------|----------|------------------------------|
-| GET    | `/api/bookings`                  | Admin    | All bookings                 |
-| GET    | `/api/bookings/{id}`             | Public   |                              |
-| GET    | `/api/bookings/reference/{ref}`  | Public   | Lookup by reference          |
-| POST   | `/api/bookings`                  | Public   | Validates capacity; unique ref |
-| PUT    | `/api/bookings/{id}/status`      | Admin    | Frees capacity if cancelled  |
-
-### Dashboard
-| Method | Endpoint                  | Auth  |
-|--------|---------------------------|-------|
-| GET    | `/api/dashboard/summary`  | Admin |
+| Category | Method | Endpoint | Description |
+| :--- | :---: | :--- | :--- |
+| **Auth** | POST | `/api/auth/login` | Log in Admin & return JWT Token |
+| **Offers** | GET | `/api/offers` | Get list of public active offers (with filters) |
+| **Offers** | GET | `/api/offers/{id}` | Get full offer details by ID |
+| **Offers** | POST | `/api/offers` | Create a new offer (Admin) |
+| **Offers** | PUT | `/api/offers/{id}` | Update existing offer (Admin) |
+| **Offers** | DELETE | `/api/offers/{id}` | Delete offer (Admin) |
+| **Slots** | GET | `/api/offers/{offerId}/slots` | Get slots list for an offer |
+| **Slots** | POST | `/api/slots` | Add a custom slot (Admin) |
+| **Slots** | PUT | `/api/slots/{id}` | Update slot details / status (Admin) |
+| **Slots** | DELETE | `/api/slots/{id}` | Cancel/delete a slot (Admin) |
+| **Bookings** | POST | `/api/bookings` | Book a slot (Public) |
+| **Bookings** | GET | `/api/bookings` | Retrieve all bookings (Admin) |
+| **Bookings** | GET | `/api/bookings/export-csv` | Download bookings CSV (Admin) |
+| **Dashboard**| GET | `/api/dashboard/summary` | Retrieve dashboard stats (Admin) |
 
 ---
 
-## 🏗️ Project Structure
+## ✅ Core Business Logic Highlights
 
-```
-.
-├── backend/
-│   └── SmartOffer.Api/
-│       ├── Controllers/    # Auth, Business, Offers, Slots, Bookings, Dashboard
-│       ├── Data/           # AppDbContext (EF Core + Npgsql)
-│       ├── Models/         # User, Business, Offer, OfferSlot, Booking
-│       ├── DTOs/           # Request/Response transfer objects
-│       ├── Program.cs      # App setup, JWT, Swagger, CORS
-│       └── appsettings.json
-└── frontend/
-    └── src/
-        ├── api/            # Axios client, auth, offers
-        ├── components/     # Navbar, OfferCard, StatusBadge
-        ├── pages/
-        │   ├── admin/      # AdminLogin, AdminDashboard, CreateOffer
-        │   └── public/     # PublicOfferList, BookingFlow
-        └── types/          # TypeScript interfaces
-```
-
----
-
-## ✅ Business Logic Highlights
-
-- **Offer price validation**: API rejects any offer where `offerPrice >= originalPrice`
-- **Capacity enforcement**: Booking fails if `bookedCount + peopleCount > capacity`
-- **Unique booking references**: Format `SOB-XXXXXXXX`, collision-retry loop
-- **Slot auto-updates**: Slot status → `Full` when fully booked; reverts if booking is cancelled
-- **Public endpoint safety**: Cancelled/Expired offers are hidden from unauthenticated users
-- **JWT authentication**: All admin routes protected with Bearer token
-
----
-
-## 🛠️ Tech Stack
-
-| Layer      | Technology                              |
-|------------|-----------------------------------------|
-| Frontend   | React 18 + TypeScript + Tailwind CSS    |
-| Bundler    | Vite 5                                  |
-| Routing    | React Router v6                         |
-| HTTP       | Axios                                   |
-| Backend    | .NET 8 Web API                          |
-| ORM        | Entity Framework Core 8                 |
-| Database   | Supabase (PostgreSQL via Npgsql)        |
-| Auth       | JWT Bearer (BCrypt password hashing)    |
-| API Docs   | Swagger / OpenAPI                       |
+*   **Maximum Booking Threshold Enforcement**: The system validates that a customer's phone number does not exceed the `MaxBookingPerCustomer` limit defined for the specific offer.
+*   **Time & Date Validity Sweeps**: Expired offers are automatically updated to `Expired` and hidden from the public query streams.
+*   **Capacity Checks**: Rejects reservation payloads if the booking quantity exceeds slot capacities.
+*   **Automatic Slot Generation**: Once an offer is set to `Active`, the system automatically provisions daily booking slots according to operating hours and capacities.
+*   **Capacity Restoration**: Cancelling a booking automatically restores the capacity of its corresponding slot.
+*   **Unique Reference Assignment**: Generates a standard `SOB-XXXXXXXX` reference code using collision-safe retry loops.

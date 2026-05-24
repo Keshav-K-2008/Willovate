@@ -38,6 +38,9 @@ export interface Offer {
   discountPercentage: number;
   startDate: string;
   endDate: string;
+  startTime: string;
+  endTime: string;
+  maxBookingPerCustomer: number;
   termsAndConditions: string;
   status: OfferStatus;
   createdAt: string;
@@ -102,6 +105,9 @@ export interface CreateOfferDto {
   offerPrice: number;
   startDate: string;
   endDate: string;
+  startTime: string;
+  endTime: string;
+  maxBookingPerCustomer: number;
   termsAndConditions: string;
   status: OfferStatus;
 }
@@ -121,9 +127,12 @@ export interface DashboardSummary {
   activeOffers: number;
   totalBookings: number;
   confirmedBookings: number;
+  todayBookings: number;
   totalSlots: number;
   totalCapacity: number;
   totalBooked: number;
+  availableSeats: number;
+  conversionRate: number;
   recentBookings: RecentBooking[];
 }
 

@@ -45,15 +45,23 @@ public class DashboardController : ControllerBase
             })
             .ToListAsync();
 
+        var todayUtc = DateTime.UtcNow.Date;
+        var todayBookings = await _db.Bookings.CountAsync(b => b.CreatedAt.Date == todayUtc);
+        var availableSeats = totalCapacity - totalBooked;
+        var conversionRate = totalCapacity > 0 ? Math.Round(((double)totalBooked / totalCapacity) * 100, 2) : 0.0;
+
         return Ok(new DashboardSummaryDto
         {
             TotalOffers = totalOffers,
             ActiveOffers = activeOffers,
             TotalBookings = totalBookings,
             ConfirmedBookings = confirmedBookings,
+            TodayBookings = todayBookings,
             TotalSlots = totalSlots,
             TotalCapacity = totalCapacity,
             TotalBooked = totalBooked,
+            AvailableSeats = availableSeats,
+            ConversionRate = conversionRate,
             RecentBookings = recentBookings
         });
     }

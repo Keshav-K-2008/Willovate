@@ -7,6 +7,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import CreateOffer from './pages/admin/CreateOffer';
 import PublicOfferList from './pages/public/PublicOfferList';
 import BookingFlow from './pages/public/BookingFlow';
+import OfferDetail from './pages/public/OfferDetail';
 
 // Auth guard for admin routes
 function ProtectedRoute() {
@@ -58,6 +59,7 @@ export default function App() {
         {/* Public routes */}
         <Route element={<Layout />}>
           <Route index element={<PublicOfferList />} />
+          <Route path="offers/:offerId" element={<OfferDetail />} />
           <Route path="offers/:offerId/book" element={<BookingFlow />} />
         </Route>
 

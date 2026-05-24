@@ -49,6 +49,9 @@ public class CreateOfferDto
     public decimal OfferPrice { get; set; }
     public string StartDate { get; set; } = string.Empty;
     public string EndDate { get; set; } = string.Empty;
+    public string StartTime { get; set; } = "09:00";
+    public string EndTime { get; set; } = "18:00";
+    public int MaxBookingPerCustomer { get; set; } = 4;
     public string TermsAndConditions { get; set; } = string.Empty;
     public OfferStatus Status { get; set; } = OfferStatus.Draft;
 }
@@ -99,9 +102,12 @@ public class DashboardSummaryDto
     public int ActiveOffers { get; set; }
     public int TotalBookings { get; set; }
     public int ConfirmedBookings { get; set; }
+    public int TodayBookings { get; set; }
     public int TotalSlots { get; set; }
     public int TotalCapacity { get; set; }
     public int TotalBooked { get; set; }
+    public int AvailableSeats { get; set; }
+    public double ConversionRate { get; set; }
     public List<RecentBookingDto> RecentBookings { get; set; } = new();
 }
 

@@ -6,6 +6,9 @@ export const getPublicOffers = (params?: {
   businessType?: string;
   category?: string;
   date?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  availableOnly?: boolean;
 }) => client.get<Offer[]>('/api/offers', { params }).then((r) => r.data);
 
 export const getAllOffersAdmin = () =>
@@ -35,6 +38,17 @@ export const createSlot = (data: {
   capacity: number;
 }) => client.post<OfferSlot>('/api/slots', data).then((r) => r.data);
 
+export const updateSlot = (id: number, data: {
+  slotDate: string;
+  startTime: string;
+  endTime: string;
+  capacity: number;
+  status: string;
+}) => client.put<OfferSlot>(`/api/slots/${id}`, data).then((r) => r.data);
+
+export const deleteSlot = (id: number) =>
+  client.delete(`/api/slots/${id}`).then((r) => r.data);
+
 // ── Businesses ────────────────────────────────────────────────────────────────
 export const getBusinesses = () =>
   client.get('/api/business').then((r) => r.data);
@@ -58,6 +72,18 @@ export const updateBookingStatus = (id: number, status: string) =>
 
 export const deleteBooking = (id: number) =>
   client.delete(`/api/bookings/${id}`).then((r) => r.data);
+
+export const exportBookingsCsv = () =>
+  client.get('/api/bookings/export-csv', { responseType: 'blob' })
+    .then((r) => {
+      const url = window.URL.createObjectURL(new Blob([r.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `bookings_export_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    });
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 export const getDashboardSummary = () =>

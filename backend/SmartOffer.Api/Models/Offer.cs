@@ -39,6 +39,12 @@ public class Offer
 
     public DateOnly EndDate { get; set; }
 
+    public TimeOnly StartTime { get; set; } = new TimeOnly(9, 0);
+
+    public TimeOnly EndTime { get; set; } = new TimeOnly(18, 0);
+
+    public int MaxBookingPerCustomer { get; set; } = 4;
+
     public string TermsAndConditions { get; set; } = string.Empty;
 
     public OfferStatus Status { get; set; } = OfferStatus.Draft;

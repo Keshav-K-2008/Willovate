@@ -10,16 +10,19 @@ export default function PublicOfferList() {
   const [offers, setOffers] = useState<Offer[]>([]);
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({ businessType: '', category: '', date: '' });
+  const [filters, setFilters] = useState({ businessType: '', category: '', date: '', minPrice: '', maxPrice: '', availableOnly: false });
   const [search, setSearch] = useState('');
 
   const fetchOffers = useCallback(async () => {
     setLoading(true);
     try {
-      const params: Record<string, string> = {};
+      const params: any = {};
       if (filters.businessType) params.businessType = filters.businessType;
       if (filters.category && filters.category !== 'All') params.category = filters.category;
       if (filters.date) params.date = filters.date;
+      if (filters.minPrice) params.minPrice = Number(filters.minPrice);
+      if (filters.maxPrice) params.maxPrice = Number(filters.maxPrice);
+      if (filters.availableOnly) params.availableOnly = filters.availableOnly;
       const data = await getPublicOffers(params);
       setOffers(data);
     } catch {
@@ -40,11 +43,18 @@ export default function PublicOfferList() {
   );
 
   const clearFilters = () => {
-    setFilters({ businessType: '', category: '', date: '' });
+    setFilters({ businessType: '', category: '', date: '', minPrice: '', maxPrice: '', availableOnly: false });
     setSearch('');
   };
 
-  const activeFilterCount = [filters.businessType, filters.category && filters.category !== 'All' ? filters.category : '', filters.date].filter(Boolean).length;
+  const activeFilterCount = [
+    filters.businessType,
+    filters.category && filters.category !== 'All' ? filters.category : '',
+    filters.date,
+    filters.minPrice,
+    filters.maxPrice,
+    filters.availableOnly ? 'available' : ''
+  ].filter(Boolean).length;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -118,6 +128,41 @@ export default function PublicOfferList() {
           onChange={e => setFilters(p => ({ ...p, date: e.target.value }))}
           className="bg-dark-800 border border-dark-600 text-slate-300 text-sm rounded-xl px-4 py-2.5 outline-none focus:border-brand-500 cursor-pointer"
         />
+
+        {/* Price Min */}
+        <div className="flex items-center bg-dark-800 border border-dark-600 rounded-xl px-3 py-2.5 focus-within:border-brand-500 transition-colors">
+          <span className="text-slate-500 text-sm mr-1.5">$</span>
+          <input
+            type="number"
+            placeholder="Min Price"
+            value={filters.minPrice}
+            onChange={e => setFilters(p => ({ ...p, minPrice: e.target.value }))}
+            className="bg-transparent border-none text-slate-300 text-sm outline-none w-16 placeholder:text-slate-600"
+          />
+        </div>
+
+        {/* Price Max */}
+        <div className="flex items-center bg-dark-800 border border-dark-600 rounded-xl px-3 py-2.5 focus-within:border-brand-500 transition-colors">
+          <span className="text-slate-500 text-sm mr-1.5">$</span>
+          <input
+            type="number"
+            placeholder="Max Price"
+            value={filters.maxPrice}
+            onChange={e => setFilters(p => ({ ...p, maxPrice: e.target.value }))}
+            className="bg-transparent border-none text-slate-300 text-sm outline-none w-16 placeholder:text-slate-600"
+          />
+        </div>
+
+        {/* Available Only */}
+        <label className="flex items-center gap-2 bg-dark-800 border border-dark-600 rounded-xl px-4 py-2.5 cursor-pointer hover:border-brand-500 transition-colors select-none">
+          <input
+            type="checkbox"
+            checked={filters.availableOnly}
+            onChange={e => setFilters(p => ({ ...p, availableOnly: e.target.checked }))}
+            className="accent-brand-500 w-4 h-4 rounded cursor-pointer"
+          />
+          <span className="text-slate-300 text-sm font-medium">Available Only</span>
+        </label>
 
         {/* Category Pills */}
         <div className="flex flex-wrap gap-2">

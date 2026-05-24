@@ -49,6 +49,8 @@ public class AppDbContext : DbContext
 
             e.Property(o => o.StartDate).HasColumnType("date");
             e.Property(o => o.EndDate).HasColumnType("date");
+            e.Property(o => o.StartTime).HasColumnType("time");
+            e.Property(o => o.EndTime).HasColumnType("time");
         });
 
         // ── OfferSlot ─────────────────────────────────────────────────────────

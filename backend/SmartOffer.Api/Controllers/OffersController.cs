@@ -20,8 +20,24 @@ public class OffersController : ControllerBase
     public async Task<IActionResult> GetAll(
         [FromQuery] string? businessType,
         [FromQuery] string? category,
-        [FromQuery] string? date)
+        [FromQuery] string? date,
+        [FromQuery] decimal? minPrice,
+        [FromQuery] decimal? maxPrice,
+        [FromQuery] bool? availableOnly)
     {
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var expiredOffers = await _db.Offers
+            .Where(o => o.Status == OfferStatus.Active && o.EndDate < today)
+            .ToListAsync();
+        if (expiredOffers.Any())
+        {
+            foreach (var o in expiredOffers)
+            {
+                o.Status = OfferStatus.Expired;
+            }
+            await _db.SaveChangesAsync();
+        }
+
         // Self-heal: seed slots for active offers that have 0 slots
         var activeOffersWithoutSlots = await _db.Offers
             .Include(o => o.Slots)
@@ -39,8 +55,8 @@ public class OffersController : ControllerBase
                     {
                         OfferId = offer.Id,
                         SlotDate = currentDate,
-                        StartTime = new TimeOnly(9, 0),
-                        EndTime = new TimeOnly(18, 0),
+                        StartTime = offer.StartTime,
+                        EndTime = offer.EndTime,
                         Capacity = 20,
                         BookedCount = 0,
                         Status = SlotStatus.Available,
@@ -68,15 +84,38 @@ public class OffersController : ControllerBase
             query = query.Where(o => o.StartDate <= parsedDate && o.EndDate >= parsedDate);
         }
 
+        if (minPrice.HasValue)
+            query = query.Where(o => o.OfferPrice >= minPrice.Value);
+
+        if (maxPrice.HasValue)
+            query = query.Where(o => o.OfferPrice <= maxPrice.Value);
+
+        if (availableOnly.HasValue && availableOnly.Value)
+        {
+            query = query.Where(o => o.Slots.Any(s => s.Status == SlotStatus.Available && s.BookedCount < s.Capacity));
+        }
+
         var offers = await query.OrderByDescending(o => o.CreatedAt).ToListAsync();
         return Ok(offers);
     }
 
-    /// <summary>Admin: returns all offers regardless of status.</summary>
     [HttpGet("all")]
     [Authorize]
     public async Task<IActionResult> GetAllAdmin()
     {
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var expiredOffers = await _db.Offers
+            .Where(o => o.Status == OfferStatus.Active && o.EndDate < today)
+            .ToListAsync();
+        if (expiredOffers.Any())
+        {
+            foreach (var o in expiredOffers)
+            {
+                o.Status = OfferStatus.Expired;
+            }
+            await _db.SaveChangesAsync();
+        }
+
         var offers = await _db.Offers
             .Include(o => o.Business)
             .OrderByDescending(o => o.CreatedAt)
@@ -94,6 +133,12 @@ public class OffersController : ControllerBase
             .FirstOrDefaultAsync(o => o.Id == id);
 
         if (offer == null) return NotFound(new { message = "Offer not found." });
+
+        if (offer.Status == OfferStatus.Active && offer.EndDate < DateOnly.FromDateTime(DateTime.UtcNow))
+        {
+            offer.Status = OfferStatus.Expired;
+            await _db.SaveChangesAsync();
+        }
 
         // Public endpoint: hide cancelled/expired
         if (!User.Identity!.IsAuthenticated &&
@@ -124,6 +169,9 @@ public class OffersController : ControllerBase
             DiscountPercentage = discount,
             StartDate = DateOnly.Parse(dto.StartDate),
             EndDate = DateOnly.Parse(dto.EndDate),
+            StartTime = TimeOnly.Parse(dto.StartTime),
+            EndTime = TimeOnly.Parse(dto.EndTime),
+            MaxBookingPerCustomer = dto.MaxBookingPerCustomer,
             TermsAndConditions = dto.TermsAndConditions,
             Status = dto.Status,
             CreatedAt = DateTime.UtcNow,
@@ -143,8 +191,8 @@ public class OffersController : ControllerBase
                 {
                     OfferId = offer.Id,
                     SlotDate = currentDate,
-                    StartTime = new TimeOnly(9, 0),
-                    EndTime = new TimeOnly(18, 0),
+                    StartTime = offer.StartTime,
+                    EndTime = offer.EndTime,
                     Capacity = 20,
                     BookedCount = 0,
                     Status = SlotStatus.Available,
@@ -177,6 +225,9 @@ public class OffersController : ControllerBase
         offer.DiscountPercentage = Math.Round((1 - dto.OfferPrice / dto.OriginalPrice) * 100, 2);
         offer.StartDate = DateOnly.Parse(dto.StartDate);
         offer.EndDate = DateOnly.Parse(dto.EndDate);
+        offer.StartTime = TimeOnly.Parse(dto.StartTime);
+        offer.EndTime = TimeOnly.Parse(dto.EndTime);
+        offer.MaxBookingPerCustomer = dto.MaxBookingPerCustomer;
         offer.TermsAndConditions = dto.TermsAndConditions;
         offer.Status = dto.Status;
         offer.UpdatedAt = DateTime.UtcNow;
@@ -193,8 +244,8 @@ public class OffersController : ControllerBase
                 {
                     OfferId = offer.Id,
                     SlotDate = currentDate,
-                    StartTime = new TimeOnly(9, 0),
-                    EndTime = new TimeOnly(18, 0),
+                    StartTime = offer.StartTime,
+                    EndTime = offer.EndTime,
                     Capacity = 20,
                     BookedCount = 0,
                     Status = SlotStatus.Available,

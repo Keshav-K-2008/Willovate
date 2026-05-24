@@ -25,9 +25,11 @@ export default function OfferCard({ offer, showBookButton = true }: Props) {
           <span className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full mb-2 ${catStyle}`}>
             {offer.category}
           </span>
-          <h3 className="font-display font-bold text-lg text-slate-100 leading-snug line-clamp-2 group-hover:text-brand-500 transition-colors">
-            {offer.title}
-          </h3>
+          <Link to={`/offers/${offer.id}`}>
+            <h3 className="font-display font-bold text-lg text-slate-100 leading-snug line-clamp-2 group-hover:text-brand-500 transition-colors">
+              {offer.title}
+            </h3>
+          </Link>
         </div>
         <StatusBadge status={offer.status} />
       </div>
@@ -73,10 +75,10 @@ export default function OfferCard({ offer, showBookButton = true }: Props) {
       {/* CTA */}
       {showBookButton && (
         <Link
-          to={`/offers/${offer.id}/book`}
+          to={`/offers/${offer.id}`}
           className="btn-primary text-center text-sm mt-1"
         >
-          Book Now →
+          View Details & Book →
         </Link>
       )}
     </div>
