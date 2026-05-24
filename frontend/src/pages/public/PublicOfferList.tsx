@@ -94,7 +94,8 @@ export default function PublicOfferList() {
           placeholder="Search offers or businesses…"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="input-field pl-11 py-3.5 text-base"
+          className="input-field py-3.5 text-base"
+          style={{ paddingLeft: '2.75rem' }}
         />
       </div>
 
@@ -126,7 +127,7 @@ export default function PublicOfferList() {
               onClick={() => setFilters(p => ({ ...p, category: cat === 'All' ? '' : cat }))}
               className={`px-3.5 py-1.5 rounded-full text-sm font-medium transition-all duration-200 active:scale-95 hover:-translate-y-0.5 ${
                 (filters.category === cat) || (cat === 'All' && !filters.category)
-                  ? 'bg-brand-500 text-white shadow-md shadow-violet-500/25'
+                  ? 'bg-brand-500 text-white shadow-md shadow-brand-500/25'
                   : 'bg-dark-800 border border-dark-600 text-slate-400 hover:border-brand-500 hover:text-slate-200'
               }`}
             >
@@ -186,7 +187,7 @@ export default function PublicOfferList() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {businesses.map(b => (
-              <div key={b.id} className="card bg-dark-800/40 hover:bg-dark-800 flex flex-col justify-between hover:shadow-violet-500/10 hover:border-brand-500">
+              <div key={b.id} className="card bg-dark-800/40 hover:bg-dark-800 flex flex-col justify-between hover:shadow-brand-500/10 hover:border-brand-500">
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-brand-100 dark:bg-brand-900/40 text-brand-500 dark:text-brand-300">
