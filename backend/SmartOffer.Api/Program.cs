@@ -187,4 +187,54 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
+// Ensure the admin user exists in the database on startup and matches configuration credentials
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var adminEmail = builder.Configuration["AdminCredentials:Email"] ?? "admin@smartoffer.com";
+    var adminPassword = builder.Configuration["AdminCredentials:Password"] ?? "Admin@123";
+
+    var adminByEmail = await db.Users.FirstOrDefaultAsync(u => u.Email == adminEmail);
+    if (adminByEmail != null)
+    {
+        adminByEmail.Name = "Admin";
+        adminByEmail.Role = "Admin";
+        adminByEmail.PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword);
+        await db.SaveChangesAsync();
+        Console.WriteLine($"[STARTUP] Synchronized admin credentials to: {adminEmail} (Name: Admin)");
+    }
+    else
+    {
+        var firstAdmin = await db.Users.FirstOrDefaultAsync(u => u.Role == "Admin");
+        if (firstAdmin != null)
+        {
+            firstAdmin.Name = "Admin";
+            firstAdmin.Email = adminEmail;
+            firstAdmin.PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword);
+            try
+            {
+                await db.SaveChangesAsync();
+                Console.WriteLine($"[STARTUP] Updated existing admin user to: {adminEmail} (Name: Admin)");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[STARTUP] Warning: Could not update first admin email due to unique constraint: {ex.Message}");
+            }
+        }
+        else
+        {
+            db.Users.Add(new User
+            {
+                Name = "Admin",
+                Email = adminEmail,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword),
+                Role = "Admin",
+                CreatedAt = DateTime.UtcNow
+            });
+            await db.SaveChangesAsync();
+            Console.WriteLine($"[STARTUP] Created default admin credentials: {adminEmail} (Name: Admin)");
+        }
+    }
+}
+
 app.Run();
